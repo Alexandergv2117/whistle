@@ -28,7 +28,7 @@ PATTERN = re.compile(
 
 # So it does not look like a bot: do not always reply, nor repeatedly in the same channel
 REPLY_PROBABILITY = 1.0  # 1.0 = always reply; lower it (e.g. 0.7) to skip some
-COOLDOWN = 12 * 3600  # minimum seconds between replies in the same channel (12 h)
+COOLDOWN = 0  # minimum seconds between replies in the same channel (0 = no cooldown)
 last_reply = {}  # channel -> time of the last reply
 
 # Allowed channels (comma-separated IDs). If not set, it replies everywhere.
