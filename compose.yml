@@ -1,8 +1,11 @@
 services:
   whistle:
-    image: whistle-bot:latest
-    container_name: whistle
+    image: ghcr.io/alexandergv2117/whistle:latest
     restart: unless-stopped
+    environment:
+      SLACK_USER_TOKEN: ${SLACK_USER_TOKEN:?SLACK_USER_TOKEN is required}
+      SLACK_APP_TOKEN: ${SLACK_APP_TOKEN:?SLACK_APP_TOKEN is required}
+      SLACK_CHANNEL_ID: ${SLACK_CHANNEL_ID:-}
     read_only: true
     tmpfs:
       - /tmp:size=16m,noexec,nosuid,nodev

@@ -3,6 +3,11 @@ name: Build and publish Docker image
 on:
   push:
     branches: [dev]
+    paths:
+      - app.py
+      - requirements.txt
+      - Dockerfile
+      - .dockerignore
 
 env:
   REGISTRY: ghcr.io
