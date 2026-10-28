@@ -23,7 +23,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          app-name: api
-          dockerfile: apps/api/Dockerfile
-          context: apps/api
-          push: true
+          app-name: whistle
+          dockerfile: Dockerfile
+          context: .
+          push: false
