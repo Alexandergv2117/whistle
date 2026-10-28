@@ -26,4 +26,4 @@ jobs:
           app-name: whistle
           dockerfile: Dockerfile
           context: .
-          push: false
+          push: true
