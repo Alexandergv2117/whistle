@@ -1,0 +1,20 @@
+services:
+  whistle:
+    image: whistle-bot:latest
+    container_name: whistle
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 100
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,29 @@
+name: Build and publish Docker image
+
+on:
+  push:
+    branches: [dev]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - id: build
+        name: Build and Pusblish Image
+        uses: Alexandergv2117/actions/docker-build-push@dev
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          app-name: api
+          dockerfile: apps/api/Dockerfile
+          context: apps/api
+          push: true
