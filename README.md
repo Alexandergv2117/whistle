@@ -1,113 +1,51 @@
 # Whistle bot 😗🎶
 
-A Slack bot that automatically replies with a random GIF when someone mentions the "chiflido" (whistle).
+A Slack bot that replies with a random GIF when someone mentions the "chiflido" (whistle).
+It runs in Socket Mode and posts **as your user** (`xoxp-` token).
 
-It listens to the messages in the channels you are in and, when it detects a whistle-related word
-(*chiflido*, *silbidito*, *pitido*, *fiu*, *whistle*...), it replies with a random GIF from a list.
+## 1. Configure the Slack app
 
-## How it works
+1. Go to <https://api.slack.com/apps> → **Create New App** → **From a manifest**.
+2. Pick your workspace, paste the contents of [`manifest.json`](manifest.json) (JSON tab) and create the app.
+3. **Basic Information → App-Level Tokens → Generate Token and Scopes**: add the
+   `connections:write` scope and generate it. Copy the `xapp-...` token → `SLACK_APP_TOKEN`.
+4. **Install App → Install to Workspace** and allow it. Copy the **User OAuth Token**
+   (`xoxp-...`) → `SLACK_USER_TOKEN`.
 
-- Uses [Slack Bolt for Python](https://slack.dev/bolt-python/) in **Socket Mode** (no public URL needed).
-- Uses a **user token** (`xoxp-...`), so replies are posted with your account, not as a bot.
-- Waits 3 to 10 seconds before replying so it looks natural.
-- Ignores your own messages and other bots' messages.
-- Does not reply every time, so it does not look like a bot:
-  - `REPLY_PROBABILITY`: chance of replying (1.0 = always).
-  - `COOLDOWN`: minimum time between replies in the same channel (12 h by default).
-- Optionally restricts replies to specific channels (see `SLACK_CHANNEL_ID`).
-- Matching is case-insensitive and based on word stems, so it covers all forms:
-  - `chifl…`: chiflido, chiflidito, chifle, chiflar...
-  - `silb…` / `silv…`: silbido, silbidito, silvidito, silbar, silbato...
-  - `pit…`: pito, pitido, pitazo, pitar...
-  - `fiu`, `whistle`.
+Optional: to limit the bot to certain channels, copy their IDs (channel name → **View channel
+details** → bottom of **About**) into `SLACK_CHANNEL_ID`, comma-separated.
 
-## Requirements
+## 2. Environment variables
 
-- Python 3.9+ (or Docker)
-- A Slack app with Socket Mode enabled
+| Variable           | Required | Description                                          |
+| ------------------ | -------- | ---------------------------------------------------- |
+| `SLACK_USER_TOKEN` | yes      | `xoxp-...` user token                                |
+| `SLACK_APP_TOKEN`  | yes      | `xapp-...` app-level token                           |
+| `SLACK_CHANNEL_ID` | no       | Channel ID(s), comma-separated. Empty = all channels |
 
-## Slack app setup
+> ⚠️ Never commit `.env`: the user token gives access to your account.
 
-1. Create an app at <https://api.slack.com/apps> (*From scratch*).
-2. Under **Socket Mode**, enable it and generate an **App-Level Token** with the
-   `connections:write` scope → this is your `SLACK_APP_TOKEN` (`xapp-...`).
-3. Under **OAuth & Permissions**, add the following **User Token Scopes**:
-   - `channels:history`, `groups:history`, `im:history`, `mpim:history` (read messages)
-   - `chat:write` (post as you)
-4. Under **Event Subscriptions**, enable it and subscribe to user events
-   (*Subscribe to events on behalf of users*): `message.channels`, `message.groups`,
-   `message.im`, `message.mpim`.
-5. Install the app in your workspace and copy the **User OAuth Token** → this is your
-   `SLACK_USER_TOKEN` (`xoxp-...`).
-
-## Installation
+## 3. Run after cloning
 
 ```bash
+git clone https://github.com/Alexandergv2117/whistle.git
+cd whistle
+cp .env.example .env   # fill in the tokens
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-```
-
-## Environment variables
-
-Copy the example file and fill in your tokens:
-
-```bash
-cp .env.example .env
-```
-
-| Variable           | Description                                                                            |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| `SLACK_USER_TOKEN` | User token (`xoxp-...`), posts with your account                                       |
-| `SLACK_APP_TOKEN`  | App token (`xapp-...`) for Socket Mode                                                 |
-| `SLACK_CHANNEL_ID` | Optional. Channel ID(s) (`C0123456789`), comma-separated. If empty, replies everywhere |
-
-> ⚠️ Never commit your `.env` file: it contains credentials that give access to your account.
-
-## Usage
-
-```bash
 python3 app.py
 ```
 
-Keep the process running; the bot replies while it is active.
+## 4. Production (Docker Compose)
 
-## Docker
-
-The `Dockerfile` is multi-stage (dependencies are built in one stage, only the virtualenv and
-code are copied to the final image) and runs as an unprivileged user.
+Uses the prebuilt image `ghcr.io/alexandergv2117/whistle:latest`. Compose reads the tokens
+from a `.env` file next to `compose.yml`.
 
 ```bash
-docker build -t whistle-bot:latest .
-docker run -d --name whistle --env-file .env whistle-bot:latest
-```
-
-`compose.yml` runs a prebuilt image with a hardened configuration (read-only filesystem, no
-capabilities, `no-new-privileges`, resource limits). It does not build the image and does not
-load `.env`, so provide the tokens as environment variables (for example by adding an
-`env_file: .env` entry to the service).
-
-```bash
+cp .env.example .env   # fill in the tokens
 docker compose up -d
+docker compose logs -f whistle
 ```
 
-### Published image (GitHub Actions)
-
-The workflow in `.github/workflows/docker-publish.yml` builds the image and publishes it to
-GitHub Container Registry (`ghcr.io/<owner>/<repo>`):
-
-- Push to `main` → tags `latest` and `sha-<commit>`.
-- Tag `vX.Y.Z` → tag `X.Y.Z`.
-- Pull requests → build only, nothing is pushed.
-
-To use it, set `image:` in `compose.yml` to that name, for example
-`ghcr.io/<owner>/<repo>:latest`.
-
-## Customization
-
-Everything lives in `app.py`:
-
-- **Words to detect:** edit the `PATTERN` regular expression.
-- **GIFs:** add public links to the `GIFS` list (format `https://media.giphy.com/media/<id>/giphy.gif`).
-- **Reply frequency:** adjust `REPLY_PROBABILITY` and `COOLDOWN`.
-- **Delay:** change the range in `time.sleep(random.uniform(3, 10))`.
+To update: `docker compose pull && docker compose up -d`.
