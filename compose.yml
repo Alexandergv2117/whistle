@@ -6,6 +6,11 @@ services:
       SLACK_USER_TOKEN: ${SLACK_USER_TOKEN:?SLACK_USER_TOKEN is required}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN:?SLACK_APP_TOKEN is required}
       SLACK_CHANNEL_ID: ${SLACK_CHANNEL_ID:-}
+      GIFS: ${GIFS:?GIFS is required}
+      REPLY_DELAY_MIN: ${REPLY_DELAY_MIN:-5}
+      REPLY_DELAY_MAX: ${REPLY_DELAY_MAX:-45}
+      REPLY_PROBABILITY: ${REPLY_PROBABILITY:-1}
+      REPLY_COOLDOWN: ${REPLY_COOLDOWN:-7200}
     read_only: true
     tmpfs:
       - /tmp:size=16m,noexec,nosuid,nodev
